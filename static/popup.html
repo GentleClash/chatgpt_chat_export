@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ChatGPT Exporter</title>
+    <style>
+        /* I am no frontend master */
+        body {
+            width: 280px;
+            padding: 16px;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            color: #333;
+        }
+        .description {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .status {
+            font-size: 14px;
+            text-align: center;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .success {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">ChatGPT Exporter</h1>
+        <p class="description">Export your ChatGPT conversation history as JSON (for now).</p>
+        <button id="exportBtn" class="button">Export Chat</button>
+        <p id="status" class="status"></p>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
