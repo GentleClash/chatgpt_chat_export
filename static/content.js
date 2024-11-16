@@ -1,17 +1,15 @@
 function cleanText(text) {
     let lines = text.split('\n')
-        .map(line => line.trim())
+        .map(line => line.endsWith(' ') ? line.trimEnd() : line)
         .filter(line => line && 
                 !line.startsWith("This content") && 
                 !line.startsWith("Did we get it wrong"));
     
     let cleaned = lines.join('\n')
-        .replace(/\s+/g, ' ')
         .trim();
     
     return cleaned;
 }
-
 
 /*
     {
