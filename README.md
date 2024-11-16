@@ -4,14 +4,14 @@
 # ChatGPT Chat Exporter  
 **_Yet Another Extension Nobody Asked For._**
 
-So, you’re here because you decided you absolutely *must* export your ChatGPT conversation history in JSON format. Why? Nobody knows. You do you. It’s not like ChatGPT doesn’t already offer a perfectly good way to download your data. Who am I to judge?  
+It’s not like ChatGPT doesn’t already offer a perfectly good way to download your data. 
 
 ## Why Use This Extension?  
-Not sure
+Not sure, maybe it does what name says.
 ## Features (If You Can Call Them That)  
-- Exports ChatGPT conversations in **JSON** format, because *why not?*  
+- Exports ChatGPT conversations in ~~**JSON**~~ multiple formats, because *why not?*  
 - Minimalist design. (We’re just pretending this was intentional.)  
-- Icons that are way cooler than the functionality of the extension itself.
+- Icons that are way cooler than the functionality of the extension itself. (icons source: openai)
 
 ![a big picture showing small chat export button](static/export.png)  
 
@@ -40,11 +40,11 @@ I have not published it on chrome extension store, neither do I know if there ar
 
 ## Usage Instructions  
 1. Open ChatGPT coversation page.  
-2. Click the extension icon.
-3. A button to export chat will become visible. Either use that or click on the extension icon again. 
+2. If the button to export chars does not appear automatically, click the extension icon once.
+3. A button to export chat will become visible. 
 
   
-I am not responsible for any bugs that happen because, I didn’t test it thoroughly. You can open a PR if you want. 
+I am not responsible for any bugs that happen because, I didn’t test it thoroughly. You can open a PR if you want some greenery in contributions. 
 
 ---
 (the repo will not be developed further)
