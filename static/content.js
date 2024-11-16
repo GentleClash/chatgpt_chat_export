@@ -12,7 +12,28 @@ function cleanText(text) {
     return cleaned;
 }
 
-function parseAndDownload() {
+
+/*
+    {
+  "metadata": {
+    "exportDate": "timestamp",
+    "totalMessages": "count"
+  },
+  "conversations": [
+    {
+      "id": "number",
+      "user": {
+        "message": "text",
+      },
+      "assistant": {
+        "message": "text",
+      }
+    }
+  ]
+}
+  */
+
+function parseAndDownloadChatGPT() {
     const title = document.getElementsByTagName('title')[0].textContent
 
     const elements = Array.from(document.getElementsByClassName('flex'));
@@ -38,6 +59,13 @@ function parseAndDownload() {
     let chatHistory = {};
     let messageCount = 0;
     let currentDialog = {};
+    let temp = new Date();
+
+    chatHistory.metadata = {
+        exportDate: temp.toISOString().slice(0, 10) + " " + temp.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }),
+        totalMessages: articles.length
+    };
+    chatHistory.conversations = [];
 
     articles.forEach((article) => {
         const userMessage = article.querySelector('div[class="whitespace-pre-wrap"]');
@@ -46,7 +74,17 @@ function parseAndDownload() {
         if (userMessage) {
             // If we have a previous complete dialogue, save it
             if (currentDialog.user && currentDialog.chatgpt) {
-                chatHistory[messageCount] = currentDialog;
+                
+                let conversation = {
+                    id: messageCount,
+                    user: {
+                        message: currentDialog.user
+                    },
+                    assistant: {
+                        message: currentDialog.chatgpt
+                    }
+                };
+                chatHistory.conversations.push(conversation);
                 messageCount++;
             }
             // Start new dialogue with user message
@@ -67,8 +105,23 @@ function parseAndDownload() {
         }
     });
 
+
+
+
     if (currentDialog.user && currentDialog.chatgpt) {
-        chatHistory[messageCount] = currentDialog;
+
+        let conversation = {
+            id: messageCount,
+            user: {
+                message: currentDialog.user
+            },
+            assistant: {
+                message: currentDialog.chatgpt
+            }
+        };
+        chatHistory.conversations.push(conversation);
+        messageCount++;
+
     }
 
     console.log("Found message pairs:", messageCount + 1);
@@ -115,7 +168,7 @@ function addExportButton() {
         exportButton.style.backgroundColor = '#4CAF50';
     });
 
-    exportButton.addEventListener('click', parseAndDownload);
+    exportButton.addEventListener('click', parseAndDownloadChatGPT);
 
     inputContainer.insertBefore(exportButton, inputContainer.firstChild);
 }
@@ -134,7 +187,7 @@ observer.observe(document.body, {
 });
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'exportChat') {
-        parseAndDownload();
+        parseAndDownloadChatGPT();
         sendResponse({success: true});
     }
     return true; 
