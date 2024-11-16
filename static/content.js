@@ -6,7 +6,7 @@ function cleanText(text) {
                 !line.startsWith("Did we get it wrong"));
     
     let cleaned = lines.join('\n')
-        .replace(/\s+/g, ' ') //Keep guessing what it does, not that its some top magic
+        .replace(/\s+/g, ' ')
         .trim();
     
     return cleaned;
@@ -86,6 +86,52 @@ function parseAndDownload() {
     URL.revokeObjectURL(url);
 }
 
+function addExportButton() {
+    const inputContainer = Array.from(document.querySelectorAll('div.m-auto.text-base.px-3.md\\:px-4.w-full.md\\:px-5.lg\\:px-4.xl\\:px-5')).pop();
+    if (!inputContainer || document.getElementById('export-chat-btn')) {
+        return;
+    }
+    const exportButton = document.createElement('button');
+    exportButton.id = 'export-chat-btn';
+    exportButton.innerHTML = 'Export Chat';
+    exportButton.style.cssText = `
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 10px;
+        transition: background-color 0.2s;
+        position: absolute;
+        bottom: 39px; /* Magic number */
+    `;
+
+    exportButton.addEventListener('mouseover', () => {
+        exportButton.style.backgroundColor = '#45a049';
+    });
+    exportButton.addEventListener('mouseout', () => {
+        exportButton.style.backgroundColor = '#4CAF50';
+    });
+
+    exportButton.addEventListener('click', parseAndDownload);
+
+    inputContainer.insertBefore(exportButton, inputContainer.firstChild);
+}
+
+addExportButton();
+
+const observer = new MutationObserver(() => {
+    if (!document.getElementById('export-chat-btn')) {
+        addExportButton();
+    }
+});
+
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
+});
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'exportChat') {
         parseAndDownload();

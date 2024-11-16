@@ -10,7 +10,7 @@ document.getElementById('exportBtn').addEventListener('click', async () => {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         
         if (!tab.url?.includes('chatgpt.com/c/')) {
-            throw new Error('Please open ChatGPT to export conversation');
+            throw new Error('Please open ChatGPT coversation page to export conversation');
         }
         
         await chrome.tabs.sendMessage(tab.id, { action: 'exportChat' });
