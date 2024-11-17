@@ -5,12 +5,12 @@ document.getElementById('exportBtn').addEventListener('click', async () => {
     button.disabled = true;
     status.className = 'status';
     status.textContent = 'Exporting...';
-
+    
     try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         
         if (!tab.url?.includes('chatgpt.com/c/')) {
-            throw new Error('Please open ChatGPT coversation page to export conversation');
+            throw new Error('Please open ChatGPT conversation page to export conversation');
         }
         
         await chrome.tabs.sendMessage(tab.id, { action: 'exportChat' });

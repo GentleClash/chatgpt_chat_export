@@ -11,6 +11,8 @@ function cleanText(text) {
     return cleaned;
 }
 
+
+
 /*
     {
   "metadata": {
@@ -31,9 +33,8 @@ function cleanText(text) {
 }
   */
 
-function parseAndDownloadChatGPT() {
+function parseAndDownloadChatGPT(format) {
     const title = document.getElementsByTagName('title')[0].textContent
-
     const elements = Array.from(document.getElementsByClassName('flex'));
     const chatContainer = elements.find(el => 
         el.classList.contains('flex-col') && 
@@ -67,7 +68,7 @@ function parseAndDownloadChatGPT() {
 
     articles.forEach((article) => {
         const userMessage = article.querySelector('div[class="whitespace-pre-wrap"]');
-        const assistantParts = Array.from(article.getElementsByTagName('p'));
+        const assistantMessage = article.querySelector('div.markdown');
         
         if (userMessage) {
             // If we have a previous complete dialogue, save it
@@ -90,13 +91,23 @@ function parseAndDownloadChatGPT() {
                 user: cleanText(userMessage.textContent),
                 chatgpt: ''
             };
-        } else if (assistantParts.length > 0) {
-            // combining text from p tags
-            const assistantText = assistantParts
-                .map(part => part.textContent)
-                .join('\n');
+        } else if (assistantMessage) {
+            const elementsToRemove = [
+                '.absolute.bottom-0.right-2.flex.h-9.items-center',
+                '.flex.items-center.text-token-text-secondary'
+            ];
+
+            elementsToRemove.forEach(selector => {
+                const elements = assistantMessage.querySelectorAll(selector);
+                elements.forEach(el => el.remove());
+            });
+            //Good luck understanding
+            let assistantText = assistantMessage.innerHTML
+                                .replace(/<\/(?:p|h[1-6]|li)>/g, '\n')  
+                                .replace(/<[^>]*>/g, '')  
+                                .replace(/\n{3,}/g, '\n\n')  
+                                .trim();
             
-            // Add to current dialogue if we have a user message
             if (currentDialog.user) {
                 currentDialog.chatgpt = cleanText(assistantText);
             }
@@ -124,6 +135,13 @@ function parseAndDownloadChatGPT() {
 
     console.log("Found message pairs:", messageCount + 1);
 
+    if (format === 'md') {
+        chatHistory = markdownExport(chatHistory);
+    }
+
+
+
+
     // This is magic, don't touch it
     const blob = new Blob([JSON.stringify(chatHistory, null, 2)], 
                          {type: 'application/json'});
@@ -139,9 +157,44 @@ function parseAndDownloadChatGPT() {
 
 function addExportButton() {
     const inputContainer = Array.from(document.querySelectorAll('div.m-auto.text-base.px-3.md\\:px-4.w-full.md\\:px-5.lg\\:px-4.xl\\:px-5')).pop();
-    if (!inputContainer || document.getElementById('export-chat-btn')) {
+    if (!inputContainer || document.getElementById('export-chat-container')) {
         return;
     }
+
+    const exportContainer = document.createElement('div');
+    exportContainer.id = 'export-chat-container';
+    exportContainer.style.cssText = `
+        position: absolute;
+        bottom: 39px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    `;
+
+    //size should change depending on the size of the option selected
+    const exportSelect = document.createElement('select');
+    exportSelect.id = 'export-format-select';
+    exportSelect.style.cssText = `
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        background-color: black;
+        font-size: 14px;
+        cursor: pointer;
+    `;
+
+    const options = [
+        { value: 'json', label: 'JSON' },
+    ];
+
+    options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.value;
+        optionElement.textContent = option.label;
+        exportSelect.appendChild(optionElement);
+    });
+
+
     const exportButton = document.createElement('button');
     exportButton.id = 'export-chat-btn';
     exportButton.innerHTML = 'Export Chat';
@@ -153,10 +206,7 @@ function addExportButton() {
         border-radius: 4px;
         cursor: pointer;
         font-size: 14px;
-        margin-right: 10px;
         transition: background-color 0.2s;
-        position: absolute;
-        bottom: 39px; /* Magic number */
     `;
 
     exportButton.addEventListener('mouseover', () => {
@@ -166,15 +216,21 @@ function addExportButton() {
         exportButton.style.backgroundColor = '#4CAF50';
     });
 
-    exportButton.addEventListener('click', parseAndDownloadChatGPT);
+    exportButton.addEventListener('click', () => {
+        const format = exportSelect.value;
+        parseAndDownloadChatGPT(format);
+    });
 
-    inputContainer.insertBefore(exportButton, inputContainer.firstChild);
+
+    exportContainer.appendChild(exportSelect);
+    exportContainer.appendChild(exportButton);
+    inputContainer.insertBefore(exportContainer, inputContainer.firstChild);
 }
 
 addExportButton();
 
 const observer = new MutationObserver(() => {
-    if (!document.getElementById('export-chat-btn')) {
+    if (!document.getElementById('export-chat-container')) {
         addExportButton();
     }
 });
@@ -183,9 +239,11 @@ observer.observe(document.body, {
     childList: true,
     subtree: true
 });
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'exportChat') {
-        parseAndDownloadChatGPT();
+        const format = document.getElementById('export-format-select')?.value || 'json';
+        parseAndDownloadChatGPT(format);
         sendResponse({success: true});
     }
     return true; 
