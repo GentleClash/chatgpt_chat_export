@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "ChatGPT Chat Exporter",
-    "version": "1.0.5",
+    "version": "2.0.0",
     "description": "Export ChatGPT conversation history to JSON format",
     "permissions": [
       "activeTab",

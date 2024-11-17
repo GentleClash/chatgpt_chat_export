@@ -102,11 +102,32 @@ function parseAndDownloadChatGPT(format) {
                 elements.forEach(el => el.remove());
             });
             //Good luck understanding
-            let assistantText = assistantMessage.innerHTML
+            let assistantText = '';
+            if (format==='json'){
+                assistantText = assistantMessage.innerHTML
                                 .replace(/<\/(?:p|h[1-6]|li)>/g, '\n')  
                                 .replace(/<[^>]*>/g, '')  
                                 .replace(/\n{3,}/g, '\n\n')  
                                 .trim();
+            } else if (format==='md'){
+                //Don't try to understand this forbidden magic
+                assistantText = assistantMessage.innerHTML
+                                .replace(/<code(?:\s+class=".*?language-(\w+)")?>([^]*?)<\/code>/gs, (_, lang, code) => {
+                                        code = code.replace(/<span class="hljs-[^"]*">/g, '')
+                                        .replace(/<\/span>/g, '');
+                                        return lang ? 
+                                        `\`\`\`${lang}\n${code}\n\`\`\`\n` : 
+                                        `\`${code}\``;
+                                    })
+                                .replace(/<pre><code>(.*?)<\/code><\/pre>/gs, '```\n$1\n```')  
+                                .replace(/<code>(.*?)<\/code>/g, '`$1`')  
+                                .replace(/<strong>(.*?)<\/strong>/g, '**$1**')  
+                                .replace(/<em>(.*?)<\/em>/g, '*$1*')  
+                                .replace(/<\/(?:p|h[1-6]|li)>/g, '\n')
+                                .replace(/<[^>]*>/g, '')
+                                .trim(); 
+            }
+
             
             if (currentDialog.user) {
                 currentDialog.chatgpt = cleanText(assistantText);
@@ -135,24 +156,37 @@ function parseAndDownloadChatGPT(format) {
 
     console.log("Found message pairs:", messageCount + 1);
 
-    if (format === 'md') {
-        chatHistory = markdownExport(chatHistory);
-    }
-
-
-
 
     // This is magic, don't touch it
-    const blob = new Blob([JSON.stringify(chatHistory, null, 2)], 
+    if (format === 'json') {
+
+        const blob = new Blob([JSON.stringify(chatHistory, null, 2)], 
                          {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${title.replace(/\s+/g, '_')}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${title.replace(/\s+/g, '_')}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }else if(format === 'md'){
+        let markdownContent = `# ChatGPT Conversation: ${title} \nExported on: ${chatHistory.metadata.exportDate}\n\n`;
+        chatHistory.conversations.forEach(conv => {
+            markdownContent += `> **User**:\n\n\`\`\`\n${conv.user.message}\n\`\`\`\n\n___\n`;
+            markdownContent += `> **Assistant**:\n\n${conv.assistant.message}\n\n___\n___\n`;
+            });
+        const blob = new Blob([markdownContent], 
+                         {type: 'text/markdown'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${title.replace(/\s+/g, '_')}.md`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
 }
 
 function addExportButton() {
@@ -185,6 +219,7 @@ function addExportButton() {
 
     const options = [
         { value: 'json', label: 'JSON' },
+        { value: 'md', label: 'Markdown' }
     ];
 
     options.forEach(option => {
