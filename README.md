@@ -9,8 +9,8 @@ It’s not like ChatGPT doesn’t already offer a perfectly good way to download
 ## Why Use This Extension?  
 Not sure, maybe it does what name says.
 ## Features (If You Can Call Them That)  
-- Exports ChatGPT conversations in ~~**JSON**~~ multiple formats, because *why not?*  
-- Minimalist design. (We’re just pretending this was intentional.)  
+- Exports ChatGPT conversations in JSON or Markdown format.  
+- Minimalist design. (just pretend this was intentional.)  
 - Icons that are way cooler than the functionality of the extension itself. (icons source: openai)
 
 ![a big picture showing small chat export button](static/export.png)  
@@ -44,7 +44,7 @@ I have not published it on chrome extension store, neither do I know if there ar
 3. A button to export chat will become visible. 
 
   
-I am not responsible for any bugs that happen because, I didn’t test it thoroughly. You can open a PR if you want some greenery in contributions. 
+I am not responsible for any bugs that happen because, I didn’t test it thoroughly. You can open a PR if you want some greenery in contributions. Help with parsing nested unordered list in markdown format
 
 ---
 (the repo will not be developed further)
